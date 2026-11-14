@@ -416,6 +416,58 @@ class Building:
         light_pos = Vec3(center.x, center.y, center.z + height - 0.05)
         self.add_object_local(LIGHT_DOWNLIGHT, light_pos, 0.0, 0.0, 0.0)
 
+    def add_sign(self, local_pos: Vec3, text: str, font: str = "Arial Black", font_size: int = 36,
+                 font_color: int = 0xFFFFFFFF, back_color: int = 0xCC000000, align: int = 1,
+                 sign_model: int = SIGNBOARD_SURFACE, heading_deg: float = 0.0) -> SAMPObject:
+        """Adds a crisp 3D illuminated dynamic signboard with MaterialText."""
+        sign = self.add_object_local(sign_model, local_pos, 0.0, 0.0, heading_deg)
+        sign.set_material_text(0, text, material_size=130, font=font, font_size=font_size,
+                               bold=1, font_color=font_color, back_color=back_color, align=align)
+        return sign
+
+    def add_entrance_portal(self, center_pos: Vec3, width: float = 4.0, height: float = 3.5,
+                            door_model: int = GLASS_SLIDING_DOOR, pylon_model: int = CONCRETE_PILLAR_1x1,
+                            heading_deg: float = 0.0):
+        """Constructs a grand entrance portal with flanking structural pylons and double glass doors."""
+        rad = math.radians(heading_deg)
+        cos_a = math.cos(rad)
+        sin_a = math.sin(rad)
+        half_w = width / 2.0
+
+        # Flanking structural columns
+        p_left = Vec3(center_pos.x - half_w * cos_a, center_pos.y - half_w * sin_a, center_pos.z + height / 2.0)
+        p_right = Vec3(center_pos.x + half_w * cos_a, center_pos.y + half_w * sin_a, center_pos.z + height / 2.0)
+        col_l = self.add_object_local(pylon_model, p_left, 0.0, 0.0, heading_deg)
+        col_r = self.add_object_local(pylon_model, p_right, 0.0, 0.0, heading_deg)
+        self.apply_material_preset(col_l, "wall_accent")
+        self.apply_material_preset(col_r, "wall_accent")
+
+        # Centered sliding glass doors
+        door = self.add_object_local(door_model, center_pos, 0.0, 0.0, heading_deg)
+        return door
+
+    def add_cantilever_canopy(self, center_pos: Vec3, span: float = 10.0, height: float = 4.0,
+                              beam_model: int = CONCRETE_BEAM_10x1, heading_deg: float = 0.0):
+        """Adds an architectural cantilevered canopy beam framing the entrance."""
+        canopy = self.add_object_local(beam_model, Vec3(center_pos.x, center_pos.y, center_pos.z + height), 90.0, 0.0, heading_deg)
+        self.apply_material_preset(canopy, "wall_accent")
+        return canopy
+
+    def add_light(self, local_pos: Vec3, light_type: str = "downlight") -> SAMPObject:
+        """Adds architectural ceiling or neon lighting."""
+        if light_type == "downlight":
+            return self.add_object_local(LIGHT_DOWNLIGHT, local_pos, 0.0, 0.0, 0.0)
+        elif light_type == "fluorescent":
+            return self.add_object_local(LIGHT_FLUORESCENT, local_pos, 0.0, 0.0, 0.0)
+        elif light_type == "neon_blue":
+            return self.add_object_local(LIGHT_NEON_BLUE, local_pos, 0.0, 0.0, 0.0)
+        elif light_type == "neon_red":
+            return self.add_object_local(LIGHT_NEON_RED, local_pos, 0.0, 0.0, 0.0)
+        elif light_type == "neon_green":
+            return self.add_object_local(LIGHT_NEON_GREEN, local_pos, 0.0, 0.0, 0.0)
+        else:
+            return self.add_object_local(LIGHT_DOWNLIGHT, local_pos, 0.0, 0.0, 0.0)
+
 
 # ==============================================================================
 # 4. PRE-ENGINEERED ARCHITECTURAL TEMPLATES

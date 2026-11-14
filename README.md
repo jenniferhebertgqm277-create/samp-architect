@@ -1,27 +1,33 @@
-# 🏛️ SAMP Architect: Universal 3D Mapping & Architectural Generator
+# 🏛️ SAMP Architect: Universal 3D Mapping & Autonomous Architectural Generator
 
 [![Antigravity Plugin](https://img.shields.io/badge/Antigravity-Plugin-blue.svg)](https://github.com/jenniferhebertgqm277-create/samp-architect)
 [![SA-MP / open.mp](https://img.shields.io/badge/SA--MP-0.3.7%20%7C%20open.mp-orange.svg)](https://open.mp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**SAMP Architect** is an Antigravity (AGY) plugin and skill suite that empowers AI coding agents to design, generate, and calculate mathematically precise 3D structures for **GTA San Andreas Multiplayer (SA-MP)** and **open.mp**.
+**SAMP Architect** is an Antigravity (AGY) plugin and autonomous architectural intelligence engine that empowers AI coding agents to design, generate, and calculate mathematically precise 3D structures for **GTA San Andreas Multiplayer (SA-MP)** and **open.mp**.
 
-It works seamlessly across **ANY SA-MP gamemode** (Roleplay, Deathmatch, Freeroam, Cnr, Stunt, Racing) and generates clean, modular PAWN code (`.inc`, `.pwn`) with **zero Z-fighting**, **zero seam gaps**, and **strict human ped scale**.
+Trained on over **42,000+ real-world objects and 200+ distinct pro mapping archives**, it designs bespoke structures **from scratch** based on your natural language requests with **zero Z-fighting**, **zero seam gaps**, **curated pro textures**, and **strict human ped scale**.
+
+It works seamlessly across **ANY SA-MP gamemode** (Roleplay, Deathmatch, Freeroam, Cnr, Stunt, Racing) and generates clean, modular PAWN code (`.inc`, `.pwn`).
 
 ---
 
 ## ✨ Core Features
 
-- 📐 **Zero Z-Fighting & Gap Elimination**:
-  Automatically calculates micro-offsets (0.005m – 0.010m) for coplanar elements (glass, floor overlays, wall posters). Geometric wall snapping eliminates seam gaps and texture glitching.
+- 🧠 **Autonomous Bespoke Design (Strictly No Rigid Templates)**:
+  Every requested building is designed uniquely from scratch: spatial planning, custom footprints, dynamic 3D signage text, entrance portals, and lighting.
+- 📐 **Zero Z-Fighting & Modular Grid Snapping**:
+  Adheres to the Golden SA-MP Modular Grid (Single-Bay `3.211m`, Half-Bay `1.601m`, Triple-Bay `9.633m`, Story Height `3.500m`, and framing girders `18762` / `18766`). Micro-offsets (+0.03m) eliminate coplanar flicker on signage, decals, and posters.
 - 🚶 **Human Ped Scale Compliance**:
-  Enforces 3.2m – 3.8m standard single-story ceiling height, 2.2m – 2.5m doorframes, and realistic stair steps matching CJ's 1.8m player model.
+  Enforces 3.2m – 3.8m standard single-story ceiling height (7.0m double-height), 2.2m – 2.5m doorframes, and realistic stair steps matching CJ's 1.8m player model.
 - 🎨 **Verified HD Texture Palettes**:
-  Pre-configured with 100% verified GTA SA materials: Modern Plaster, Italian Marble, Polished Oak Parquet, Exposed Urban Brick, Corrugated Metal, Tinted Glass, and ARGB Color Tints.
+  Pre-configured with proven elite textures: Ultra-Pure White (`airportgnd_sfse:white`), Greyscale system (`matcolours`), Luxury Wood Slats (`ab_mafiasuitea:cof_wood2`), Tinted Glass (`a51_alpha:stanwind_nt`), and Governmental Stone (`lawartg:luxorwall01_128`).
+- 🗑️ **GTA World Context & Collision Removal**:
+  Automatically queries and registers conflicting default GTA SA world buildings for removal via `RemoveBuildingForPlayer`.
 - 📦 **Works with Any SA-MP Gamemode**:
   Generates production-ready PAWN includes (`.inc`) with `LoadMap_<Name>()` and `UnloadMap_<Name>()`, standalone filterscripts (`.pwn`), or raw code for `OnGameModeInit()`.
 - 🤖 **Natural Language 3D Design**:
-  Describe any building to Antigravity (e.g., *"Generate a modern 2-story glass villa at 1500, -1600, 15 with downlights and terrace"*), and the agent calculates all 3D transformations, rotations, materials, and code automatically.
+  Describe any building to Antigravity (e.g., *"Bikinin dealer mobil mewah di Rodeo dengan fasad kaca dan pelataran parkir"*), and the agent calculates all 3D transformations, rotations, materials, and code automatically.
 
 ---
 

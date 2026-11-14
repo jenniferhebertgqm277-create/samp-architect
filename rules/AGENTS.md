@@ -2,6 +2,15 @@
 
 These rules govern how the agent designs, calculates coordinates, and generates 3D mappings for SA-MP and open.mp.
 
+## 0. Autonomous Bespoke Design (Strictly No Pre-baked Templates)
+- **Zero Static Template Restriction**: The agent MUST NEVER force or restrict mappings into rigid, canned templates (e.g. static "villa" or "office" presets). All uploaded sample mappings and training files exist purely for the AI to **learn** architectural principles, modular dimensions, texture combinations, and framing techniques.
+- **Bespoke Generation From Scratch**: When a user requests any building (e.g. a beachfront cafe in Santa Maria Beach, a drift garage in Las Venturas, a police precinct, a modern villa, or a cartel compound), the agent acts as an autonomous master architect:
+  1. **Site & Context Analysis**: Determine target world coordinates `(X, Y, Z, Heading)` and remove overlapping default GTA SA objects via `RemoveBuildingForPlayer`.
+  2. **Parametric Space Planning**: Compute custom room sizes, floor heights, entrance portals, outdoor patios, and window bay distributions.
+  3. **Precision Mathematical Assembly**: Snap walls and structural frames using the learned modular grid (`3.211m`, `1.601m`, `9.633m`, `3.500m`, `18762`, `18766`).
+  4. **Dynamic Detailing**: Generate unique furniture layouts, customized 3D signage text (`SetDynamicObjectMaterialText`), and realistic lighting.
+  5. **Material Harmonization**: Apply verified, theme-appropriate textures from the learned palette database.
+
 ## 1. Dimensional Standards & Human Scale
 - **Player Scale**: In SA-MP, CJ / human ped height is ~1.8 units.
 - **Floor-to-Ceiling Height**: Standard single-story ceiling height MUST be between **3.2m and 3.8m**. Never make ceilings lower than 2.8m (feels claustrophobic in third-person camera) or higher than 5.0m for normal residential rooms.
