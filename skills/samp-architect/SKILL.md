@@ -26,13 +26,17 @@ When the user asks you to design or build a mapping:
    - Dimensions & Story count (e.g. 16m x 12m, 2 floors)
    - Aesthetic Palette (Modern Luxury, Industrial, Office HQ, Cyberpunk)
    - Target Location (World Coordinates X, Y, Z, and Heading Rotation)
+   - Context Check: If located at an existing GTA SA landmark, query and remove overlapping default buildings via `remove_buildings_in_box`
        │
        ▼
-[2. Geometry & 3D Math Calculation]
-   - Snap modular walls (`19353`) and slabs (`19359`/`19360`) without gaps.
-   - Floor-to-ceiling clearance: 3.2m to 3.8m.
+[2. Geometry & Anti-Looping Architectural Design]
+   - NEVER generate repetitive naive slab grids (`19360` 5x5m loops).
+   - Use large-format structural plates (`19361` 10x10m or `18344` 20x20m).
+   - Establish architectural rhythm: columns (`19363`) at 6m - 10m intervals, glass panels (`19447`), and roof fascia (`19365`).
+   - Create distinct entrance portals with sliding doors (`19856`) and dynamic text signage (`19475`).
+   - Floor-to-ceiling clearance: 3.2m to 3.8m (or 7.0m for double-height terminals).
    - Offset coplanar surfaces by 0.005m - 0.010m to prevent Z-fighting.
-   - Corner joins using structural square pillars (`19363`) or corner units (`19356`).
+   - Raised pedestrian sidewalk curbs (+0.10m to +0.25m) with safety bollards (`1237`).
        │
        ▼
 [3. Texture & Material Mapping]

@@ -182,8 +182,43 @@ class Building:
         world_rz = (local_rz + self.heading) % 360.0
         return self.add_object_world(model, world_pos.x, world_pos.y, world_pos.z, rx, ry, world_rz)
 
-    def add_removed_building(self, model: int, x: float, y: float, z: float, radius: float = 0.25):
+    def add_removed_building(self, model: int, x: float, y: float, z: float, radius: float = 0.50):
         self.removed_buildings.append(RemovedBuilding(model, x, y, z, radius))
+
+    def remove_buildings_in_box(self, x_min: float, x_max: float, y_min: float, y_max: float,
+                                db_path: str = "/root/texture-studio-bobi/scriptfiles/tstudio/allbuildings.db"):
+        """Queries and registers default GTA SA buildings inside a bounding box for removal."""
+        if not os.path.exists(db_path):
+            return
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("""
+            SELECT Model, X, Y, Z FROM Buildings
+            WHERE X BETWEEN ? AND ? AND Y BETWEEN ? AND ?
+        """, (x_min, x_max, y_min, y_max))
+        for r in c.fetchall():
+            self.add_removed_building(r[0], r[1], r[2], r[3], radius=0.50)
+        conn.close()
+
+    def remove_buildings_in_radius(self, center_x: float, center_y: float, radius: float = 60.0,
+                                   db_path: str = "/root/texture-studio-bobi/scriptfiles/tstudio/allbuildings.db"):
+        """Queries and registers default GTA SA buildings within radius for removal."""
+        if not os.path.exists(db_path):
+            return
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute("""
+            SELECT Model, X, Y, Z FROM Buildings
+            WHERE X BETWEEN ? AND ? AND Y BETWEEN ? AND ?
+        """, (center_x - radius, center_x + radius, center_y - radius, center_y + radius))
+        for r in c.fetchall():
+            dx = r[1] - center_x
+            dy = r[2] - center_y
+            if math.sqrt(dx*dx + dy*dy) <= radius:
+                self.add_removed_building(r[0], r[1], r[2], r[3], radius=0.50)
+        conn.close()
 
     def apply_material_preset(self, obj: SAMPObject, material_preset: str, slot: int = 0):
         mat = self.palette.get(material_preset)
@@ -233,6 +268,62 @@ class Building:
             if p_model == MODULAR_WALL_WIN:
                 glass_obj = self.add_object_local(GLASS_PANEL, panel_pos, 0.0, 0.0, heading_deg)
                 self.apply_material_preset(glass_obj, "glass", 0)
+
+    def build_curtain_wall_facade(self, start_pos: Vec3, length: float, height: float = 7.0,
+                                  heading_deg: float = 0.0, column_span: float = 8.0,
+                                  column_model: int = MODULAR_PILLAR_S,
+                                  glass_model: int = GLASS_PANEL,
+                                  fascia_model: int = 19365,
+                                  material_key_column: str = "wall_accent",
+                                  material_key_glass: str = "glass",
+                                  material_key_fascia: str = "roof"):
+        """
+        Builds a high-end architectural glass curtain wall facade with:
+        - Structural load-bearing columns at regular column spans
+        - Full-height tinted architectural glass panels between columns
+        - Top horizontal parapet / fascia crown
+        """
+        num_bays = max(1, int(round(length / column_span)))
+        actual_bay_len = length / num_bays
+        rad = math.radians(heading_deg)
+        cos_a = math.cos(rad)
+        sin_a = math.sin(rad)
+
+        # 1. Structural Columns
+        for i in range(num_bays + 1):
+            dist = i * actual_bay_len
+            col_x = start_pos.x + dist * cos_a
+            col_y = start_pos.y + dist * sin_a
+            col_bot = self.add_object_local(column_model, Vec3(col_x, col_y, start_pos.z + 1.75), 0.0, 0.0, heading_deg)
+            if material_key_column:
+                self.apply_material_preset(col_bot, material_key_column)
+            if height > 3.5:
+                col_top = self.add_object_local(column_model, Vec3(col_x, col_y, start_pos.z + 5.25), 0.0, 0.0, heading_deg)
+                if material_key_column:
+                    self.apply_material_preset(col_top, material_key_column)
+
+        # 2. Glass Curtain Panels in Bays
+        for b in range(num_bays):
+            bay_center_dist = (b + 0.5) * actual_bay_len
+            cx = start_pos.x + bay_center_dist * cos_a
+            cy = start_pos.y + bay_center_dist * sin_a
+
+            g1 = self.add_object_local(glass_model, Vec3(cx, cy, start_pos.z + 1.75), 0.0, 0.0, heading_deg)
+            if material_key_glass:
+                self.apply_material_preset(g1, material_key_glass)
+            if height > 3.5:
+                g2 = self.add_object_local(glass_model, Vec3(cx, cy, start_pos.z + 5.25), 0.0, 0.0, heading_deg)
+                if material_key_glass:
+                    self.apply_material_preset(g2, material_key_glass)
+
+        # 3. Horizontal Parapet / Fascia Crown
+        for b in range(num_bays):
+            bay_center_dist = (b + 0.5) * actual_bay_len
+            cx = start_pos.x + bay_center_dist * cos_a
+            cy = start_pos.y + bay_center_dist * sin_a
+            f_top = self.add_object_local(fascia_model, Vec3(cx, cy, start_pos.z + height + 0.1), 0.0, 0.0, heading_deg)
+            if material_key_fascia:
+                self.apply_material_preset(f_top, material_key_fascia)
 
     def build_rectangular_room(self, center: Vec3, width: float, depth: float, height: float = 3.50,
                                door_wall: str = "south", door_index: int = 0,
@@ -399,16 +490,17 @@ def export_gamemode_include(building: Building) -> str:
     if obj_count > 0:
         lines.append(f"static g_MapObjects_{safe_name}[{obj_count}];\n")
 
-    lines.append(f"stock LoadMap_{safe_name}()")
-    lines.append(f"{{")
-
     # Removed Buildings
     if rem_count > 0:
-        lines.append(f"    // Removed Default World Buildings")
+        lines.append(f"stock RemoveBuildings_{safe_name}(playerid)")
+        lines.append(f"{{")
         for rb in building.removed_buildings:
-            lines.append(f"    // Call inside OnPlayerConnect(playerid):")
-            lines.append(f"    // RemoveBuildingForPlayer(playerid, {rb.model}, {rb.x:.4f}, {rb.y:.4f}, {rb.z:.4f}, {rb.radius:.4f});")
-        lines.append("")
+            lines.append(f"    RemoveBuildingForPlayer(playerid, {rb.model}, {rb.x:.4f}, {rb.y:.4f}, {rb.z:.4f}, {rb.radius:.4f});")
+        lines.append(f"    return 1;")
+        lines.append(f"}}\n")
+
+    lines.append(f"stock LoadMap_{safe_name}()")
+    lines.append(f"{{")
 
     # Create Dynamic Objects
     lines.append(f"    // Dynamic Objects")
@@ -443,7 +535,7 @@ def export_gamemode_include(building: Building) -> str:
 
 def export_standalone_filterscript(building: Building) -> str:
     """Exports a ready-to-compile standalone SA-MP Filterscript (.pwn)."""
-    safe_name = building.name.replace(" ", "_")
+    safe_name = building.name.replace(" ", "_").replace("-", "_")
     include_code = export_gamemode_include(building)
 
     lines = []
@@ -455,8 +547,13 @@ def export_standalone_filterscript(building: Building) -> str:
     lines.append(f"public OnFilterScriptInit()")
     lines.append(f"{{")
     lines.append(f"    print(\"\\n======================================\");")
-    lines.append(f"    print(\" [MAP] {building.name} Loaded ({len(building.objects)} Objects)\");")
+    lines.append(f"    print(\" [MAP] {building.name} Loaded ({len(building.objects)} Objects, {len(building.removed_buildings)} Removals)\");")
     lines.append(f"    print(\"======================================\\n\");")
+    if len(building.removed_buildings) > 0:
+        lines.append(f"    for(new i = 0; i < MAX_PLAYERS; i++)")
+        lines.append(f"    {{")
+        lines.append(f"        if(IsPlayerConnected(i)) RemoveBuildings_{safe_name}(i);")
+        lines.append(f"    }}")
     lines.append(f"    LoadMap_{safe_name}();")
     lines.append(f"    return 1;")
     lines.append(f"}}\n")
@@ -464,6 +561,25 @@ def export_standalone_filterscript(building: Building) -> str:
     lines.append(f"{{")
     lines.append(f"    UnloadMap_{safe_name}();")
     lines.append(f"    return 1;")
+    lines.append(f"}}\n")
+    if len(building.removed_buildings) > 0:
+        lines.append(f"public OnPlayerConnect(playerid)")
+        lines.append(f"{{")
+        lines.append(f"    RemoveBuildings_{safe_name}(playerid);")
+        lines.append(f"    return 1;")
+        lines.append(f"}}\n")
+    lines.append(f"public OnPlayerCommandText(playerid, cmdtext[])")
+    lines.append(f"{{")
+    cmd_name = safe_name.lower().replace("ls_", "").replace("_exterior", "")
+    lines.append(f"    if(!strcmp(cmdtext, \"/{cmd_name}\", true) || !strcmp(cmdtext, \"/goto{cmd_name}\", true))")
+    lines.append(f"    {{")
+    lines.append(f"        SetPlayerPos(playerid, {building.origin.x:.4f}, {building.origin.y:.4f}, {building.origin.z + 1.0:.4f});")
+    lines.append(f"        SetPlayerFacingAngle(playerid, {building.heading:.1f});")
+    lines.append(f"        SetCameraBehindPlayer(playerid);")
+    lines.append(f"        SendClientMessage(playerid, 0x00FF00AA, \"[MAP] Teleported to {building.name}!\");")
+    lines.append(f"        return 1;")
+    lines.append(f"    }}")
+    lines.append(f"    return 0;")
     lines.append(f"}}")
 
     return "\n".join(lines)

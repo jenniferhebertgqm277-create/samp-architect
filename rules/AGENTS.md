@@ -42,3 +42,19 @@ Every realistic building must contain the following core architectural layers:
 ## 5. Performance & Streamer Optimization
 - Use large modular units (e.g. 10m x 10m slabs or walls) wherever long flat spans exist, rather than assembling dozens of tiny pieces.
 - Target dynamic object stream distance between 200.0m and 300.0m for optimal client FPS on mobile and low-end PCs.
+
+## 6. Anti-Looping & Architectural Composition Directives
+- **Strictly Prohibit Naive Tile Loops**: NEVER generate mapping by mindlessly looping dozens of small floor/ceiling tiles (`19360` 5x5m) or repetitive identical wall segments. This produces ugly "tiled matrix" slop with visible seams.
+- **Large-Format Structural Slabs**: Use 10m x 10m (`19361`) or 20m x 20m (`18344`) plates for concourses, roadways, and foundations to ensure silky smooth surfaces with minimum object count.
+- **Architectural Rhythm & Hierarchy**:
+  - Break long facades into deliberate bays using structural columns (`19363`) every 6m to 10m.
+  - Crown the top of all curtain walls and facades with horizontal fascia trim (`19365`) or parapet railings (`19367`).
+  - Feature dedicated, distinct entrance portals with sliding glass doors (`19856`) and crisp dynamic signage (`19475`), not endless uniform glass sheets.
+- **Authentic Streetscape & Human Scale Detailing**:
+  - Elevate sidewalks +0.10m to +0.25m above roadways to form realistic street curbs.
+  - Add realistic functional amenities: stainless steel bollards (`1237`), stylish benches (`1280`), luggage trolleys (`14576`), designer palm planter boxes, and live Flight/Transit Information Display Systems (FIDS).
+
+## 7. GTA World Context & Default Building Removal
+- **Zero Collision with GTA World**: When mapping at real GTA SA landmarks (e.g. LS Airport, Vinewood, Santa Maria Beach, Idlewood), ALWAYS inspect and remove overlapping default GTA SA buildings, lampposts, and clutter using `RemoveBuildingForPlayer`.
+- **Integrated Include & Script Removal**: Always export removals via `RemoveBuildings_<Name>(playerid)` so that both modular includes and standalone filterscripts cleanly clear conflicting default objects upon player connection.
+
