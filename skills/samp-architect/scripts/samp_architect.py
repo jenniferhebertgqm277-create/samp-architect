@@ -750,8 +750,10 @@ def export_gamemode_include(building: Building) -> str:
     """
     Exports a modular PAWN include file (.inc) that any gamemode can #include.
     Provides LoadMap_<Name>() and UnloadMap_<Name>() functions.
+    Enforces PAWN 31-character symbol length limits to prevent compiler warnings.
     """
     safe_name = building.name.replace(" ", "_").replace("-", "_")
+    short_name = safe_name[:14] # Guarantee symbol identifiers <= 31 chars
     obj_count = len(building.objects)
     rem_count = len(building.removed_buildings)
 
@@ -768,24 +770,24 @@ def export_gamemode_include(building: Building) -> str:
     lines.append(f"#define _inc_map_{safe_name.lower()}\n")
 
     if obj_count > 0:
-        lines.append(f"static g_MapObjects_{safe_name}[{obj_count}];\n")
+        lines.append(f"static g_MapObj_{short_name}[{obj_count}];\n")
 
     # Removed Buildings
     if rem_count > 0:
-        lines.append(f"stock RemoveBuildings_{safe_name}(playerid)")
+        lines.append(f"stock RemoveBuildings_{short_name}(playerid)")
         lines.append(f"{{")
         for rb in building.removed_buildings:
             lines.append(f"    RemoveBuildingForPlayer(playerid, {rb.model}, {rb.x:.4f}, {rb.y:.4f}, {rb.z:.4f}, {rb.radius:.4f});")
         lines.append(f"    return 1;")
         lines.append(f"}}\n")
 
-    lines.append(f"stock LoadMap_{safe_name}()")
+    lines.append(f"stock LoadMap_{short_name}()")
     lines.append(f"{{")
 
     # Create Dynamic Objects
     lines.append(f"    // Dynamic Objects")
     for i, obj in enumerate(building.objects):
-        var = f"g_MapObjects_{safe_name}[{i}]"
+        var = f"g_MapObj_{short_name}[{i}]"
         lines.append(f"    {var} = CreateDynamicObject({obj.model}, {obj.x:.4f}, {obj.y:.4f}, {obj.z:.4f}, {obj.rx:.2f}, {obj.ry:.2f}, {obj.rz:.2f});")
         for slot, mat in obj.materials.items():
             lines.append(f'    SetDynamicObjectMaterial({var}, {slot}, {mat["model"]}, "{mat["txd"]}", "{mat["name"]}", {mat["color"]});')
@@ -796,15 +798,15 @@ def export_gamemode_include(building: Building) -> str:
     lines.append(f"    return 1;")
     lines.append(f"}}\n")
 
-    lines.append(f"stock UnloadMap_{safe_name}()")
+    lines.append(f"stock UnloadMap_{short_name}()")
     lines.append(f"{{")
     if obj_count > 0:
-        lines.append(f"    for(new i = 0; i < sizeof(g_MapObjects_{safe_name}); i++)")
+        lines.append(f"    for(new i = 0; i < sizeof(g_MapObj_{short_name}); i++)")
         lines.append(f"    {{")
-        lines.append(f"        if(IsValidDynamicObject(g_MapObjects_{safe_name}[i]))")
+        lines.append(f"        if(IsValidDynamicObject(g_MapObj_{short_name}[i]))")
         lines.append(f"        {{")
-        lines.append(f"            DestroyDynamicObject(g_MapObjects_{safe_name}[i]);")
-        lines.append(f"            g_MapObjects_{safe_name}[i] = 0;")
+        lines.append(f"            DestroyDynamicObject(g_MapObj_{short_name}[i]);")
+        lines.append(f"            g_MapObj_{short_name}[i] = 0;")
         lines.append(f"        }}")
         lines.append(f"    }}")
     lines.append(f"    return 1;")
@@ -816,6 +818,7 @@ def export_gamemode_include(building: Building) -> str:
 def export_standalone_filterscript(building: Building) -> str:
     """Exports a ready-to-compile standalone SA-MP Filterscript (.pwn)."""
     safe_name = building.name.replace(" ", "_").replace("-", "_")
+    short_name = safe_name[:14]
     include_code = export_gamemode_include(building)
 
     lines = []
@@ -832,25 +835,25 @@ def export_standalone_filterscript(building: Building) -> str:
     if len(building.removed_buildings) > 0:
         lines.append(f"    for(new i = 0; i < MAX_PLAYERS; i++)")
         lines.append(f"    {{")
-        lines.append(f"        if(IsPlayerConnected(i)) RemoveBuildings_{safe_name}(i);")
+        lines.append(f"        if(IsPlayerConnected(i)) RemoveBuildings_{short_name}(i);")
         lines.append(f"    }}")
-    lines.append(f"    LoadMap_{safe_name}();")
+    lines.append(f"    LoadMap_{short_name}();")
     lines.append(f"    return 1;")
     lines.append(f"}}\n")
     lines.append(f"public OnFilterScriptExit()")
     lines.append(f"{{")
-    lines.append(f"    UnloadMap_{safe_name}();")
+    lines.append(f"    UnloadMap_{short_name}();")
     lines.append(f"    return 1;")
     lines.append(f"}}\n")
     if len(building.removed_buildings) > 0:
         lines.append(f"public OnPlayerConnect(playerid)")
         lines.append(f"{{")
-        lines.append(f"    RemoveBuildings_{safe_name}(playerid);")
+        lines.append(f"    RemoveBuildings_{short_name}(playerid);")
         lines.append(f"    return 1;")
         lines.append(f"}}\n")
     lines.append(f"public OnPlayerCommandText(playerid, cmdtext[])")
     lines.append(f"{{")
-    cmd_name = safe_name.lower().replace("ls_", "").replace("_exterior", "")
+    cmd_name = safe_name.lower().replace("balai_kota_", "").replace("ls_", "").replace("_exterior", "")
     lines.append(f"    if(!strcmp(cmdtext, \"/{cmd_name}\", true) || !strcmp(cmdtext, \"/goto{cmd_name}\", true))")
     lines.append(f"    {{")
     lines.append(f"        SetPlayerPos(playerid, {building.origin.x:.4f}, {building.origin.y:.4f}, {building.origin.z + 1.0:.4f});")
