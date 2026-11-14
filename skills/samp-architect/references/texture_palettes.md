@@ -57,7 +57,20 @@ All textures listed below are 100% verified to exist in the GTA San Andreas stan
 
 ---
 
-## 5. Usage in SA-MP PAWN & Texture Studio
+## 5. Palette: Pro Mapper Essentials (Modern Commercial & Airport Standard)
+*(Extracted from real-world elite Indonesian mapping archives e.g. ExtBandaraPratama)*
+
+| Element | Model | TXD Name | Texture Name | Visual Description |
+|---|---|---|---|---|
+| **Ultra-Pure White** | 10765 | `airportgnd_sfse` | `white` | The gold standard pure modern white material across Indonesian RP servers. |
+| **Deep Matte Black** | 10765 | `airportgnd_sfse` | `black64` | Pure solid black accent for frames, pylons, and trim. |
+| **Luxury Architectural Laminate** | 14479 | `skuzzy_motelmain` | `mp_CJ_Laminate1` | Warm Scandinavian modern wood laminate for ceilings, desks, and panels. |
+| **Tinted Architectural Glass** | 16646 | `a51_alpha` | `stanwind_nt` | Transparent tinted glass with subtle blue-grey sheen. Superior to standard glass. |
+| **Clean Road Curb / Divider** | 9514 | `711_sfw` | `ws_carpark2` | Crisp concrete curb stone and parking lot divider. |
+
+---
+
+## 6. Usage in SA-MP PAWN & Texture Studio
 
 ```pawn
 // Apply texture to dynamic object:

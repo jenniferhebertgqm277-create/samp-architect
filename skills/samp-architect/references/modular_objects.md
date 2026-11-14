@@ -16,6 +16,8 @@ This reference catalogs the premier modular construction objects introduced in S
 | **19358** | Very Narrow Wall Panel | ~0.17m x 0.80m x 3.50m | Precision filler panel. |
 | **19445** | Modern Storefront Glass Wall | ~0.10m x 4.00m x 3.50m | Large glass frame with metal mullions. |
 | **19447** | Seamless Tinted Glass Panel | ~0.05m x 3.00m x 3.00m | Ultra-clean reflective glass. Great for modern facades. |
+| **19448** | Ultra-Wide Storefront Glass | ~0.10m x 9.63m x 3.50m | Premier pro choice for airport and commercial concourses. Zero tiling seams! |
+| **19381** | Smooth Structural Panel | ~0.20m x 9.60m x 3.50m | Often rotated 90 deg for smooth road curbs and parking dividers. |
 | **19816** | Ultra-Smooth Interior Wall | ~0.15m x 3.00m x 3.50m | High resolution clean interior wall for offices and houses. |
 
 ---
@@ -38,6 +40,10 @@ This reference catalogs the premier modular construction objects introduced in S
 |---|---|---|---|
 | **19362** | Cylindrical Round Pillar | Radius ~0.30m, Height 3.50m | Classic luxury columns, hotel lobbies, porch entrances. |
 | **19363** | Square Structural Column | 0.40m x 0.40m x 3.50m | Modern architectural load-bearing columns. |
+| **18762** | Steel Girder / Modular Truss | Length ~10.0m | Rotated 90 deg for horizontal roof trusses and canopy beams. |
+| **18766** | Heavy Steel Girder / Truss | Length ~10.0m | Heavy load-bearing canopy frame and industrial girders. |
+| **2512**  | Slanted Steel Pylon Strut | Height ~6.0m | Rotated at 70 deg for dramatic cantilevered modern airport canopies. |
+| **3533**  | Pylon Base Support Column | Height ~5.0m | Anchors slanted structural canopy pylons. |
 | **19364** | Modular Straight Staircase | Length 5.0m, Height 3.50m | Exact 1-floor rise staircase matching 3.5m wall height! |
 | **19366** | Staircase Handrail / Railing | Length 5.0m | Safety railing for stairs and balconies. |
 | **19367** | Balcony Railing Panel | Length 3.2m, Height 1.10m | Clean modern balcony and terrace safety barriers. |
