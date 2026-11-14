@@ -1,12 +1,12 @@
 {
   "name": "samp-architect",
-  "description": "AI-Powered SA-MP 3D Mapping & Architectural Generator with high precision, modular construction math, curated texture palettes, and direct Texture Studio / Pawn export.",
-  "author": "Antigravity & BOBI Team",
+  "description": "Universal AI-Powered SA-MP & open.mp 3D Mapping & Architectural Generator with mathematical precision, modular construction math, verified texture palettes, and clean PAWN export.",
+  "author": "Antigravity Team",
   "version": "1.0.0",
   "logo": "assets/logo.svg",
   "homepage": "https://github.com/jenniferhebertgqm277-create/samp-architect",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jenniferhebertgqm277-create/samp-architect"
+    "url": "https://github.com/jenniferhebertgqm277-create/samp-architect.git"
   }
 }

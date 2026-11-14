@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
-SAMP Architect - High-Precision 3D Architecture & Procedural Mapping Engine
-Designed for Antigravity & Texture Studio BOBI v1.
-Generates mathematically seamless SA-MP / open.mp buildings with zero Z-fighting,
-correct human scale, modular object snapping, and high-definition texture palettes.
+SAMP Architect - Universal 3D Architecture & Procedural Mapping Engine
+Compatible with all SA-MP & open.mp gamemodes, filterscripts, and includes.
+Generates mathematically seamless 3D structures with zero Z-fighting,
+correct human ped scale, modular object snapping, and high-definition texture palettes.
 """
 
 import sys
 import os
 import math
 import json
-import sqlite3
 import argparse
 from typing import List, Dict, Tuple, Optional
 
@@ -53,10 +52,9 @@ class Vec3:
 
 
 # ==============================================================================
-# 2. VERIFIED SA-MP OBJECTS & TEXTURE PALETTES
+# 2. VERIFIED SA-MP MODULAR OBJECTS & TEXTURE PALETTES
 # ==============================================================================
 
-# Modular Building Objects
 MODULAR_WALL = 19353       # 3.20m width, 3.50m height, 0.17m thick
 MODULAR_WALL_WIN = 19354   # Wall with centered window cutout
 MODULAR_WALL_DOOR = 19355  # Wall with centered doorway
@@ -80,7 +78,6 @@ LIGHT_NEON_RED = 19173     # Red neon accent tube
 LIGHT_NEON_GREEN = 19174   # Green neon accent tube
 LIGHT_OMNI = 18646         # Ambient white light flare
 
-# Curated High-Definition Texture Palettes
 TEXTURE_PALETTES = {
     "modern_luxury": {
         "wall_ext": {"model": 14668, "txd": "711c", "name": "cj_white_wall2", "color": 0},
@@ -157,13 +154,23 @@ class SAMPObject:
         }
 
 
+class RemovedBuilding:
+    def __init__(self, model: int, x: float, y: float, z: float, radius: float = 0.25):
+        self.model = int(model)
+        self.x = round(float(x), 4)
+        self.y = round(float(y), 4)
+        self.z = round(float(z), 4)
+        self.radius = round(float(radius), 4)
+
+
 class Building:
     def __init__(self, name: str, origin: Vec3, heading: float = 0.0, palette_name: str = "modern_luxury"):
-        self.name = name
+        self.name = name.replace(" ", "_")
         self.origin = origin
         self.heading = heading
         self.palette = TEXTURE_PALETTES.get(palette_name, TEXTURE_PALETTES["modern_luxury"])
         self.objects: List[SAMPObject] = []
+        self.removed_buildings: List[RemovedBuilding] = []
 
     def add_object_world(self, model: int, x: float, y: float, z: float, rx: float = 0.0, ry: float = 0.0, rz: float = 0.0) -> SAMPObject:
         obj = SAMPObject(model, x, y, z, rx, ry, rz)
@@ -175,16 +182,16 @@ class Building:
         world_rz = (local_rz + self.heading) % 360.0
         return self.add_object_world(model, world_pos.x, world_pos.y, world_pos.z, rx, ry, world_rz)
 
+    def add_removed_building(self, model: int, x: float, y: float, z: float, radius: float = 0.25):
+        self.removed_buildings.append(RemovedBuilding(model, x, y, z, radius))
+
     def apply_material_preset(self, obj: SAMPObject, material_preset: str, slot: int = 0):
         mat = self.palette.get(material_preset)
         if mat:
             obj.set_material(slot, mat["model"], mat["txd"], mat["name"], mat["color"])
 
-    # --- Architectural Components ---
-
     def build_slab_grid(self, start_pos: Vec3, width: float, depth: float, z_offset: float = 0.0,
                         slab_model: int = MODULAR_SLAB, step: float = 3.20, material_key: str = "floor"):
-        """Fills a rectangular floor or ceiling using modular slab grid."""
         cols = max(1, int(round(width / step)))
         rows = max(1, int(round(depth / step)))
 
@@ -203,7 +210,6 @@ class Building:
     def build_straight_wall(self, start_pt: Vec3, length: float, heading_deg: float,
                             wall_model: int = MODULAR_WALL, wall_step: float = 3.20,
                             material_key: str = "wall_ext", window_interval: int = 0):
-        """Constructs a straight wall of given length with optional repeating window pattern."""
         num_panels = max(1, int(round(length / wall_step)))
         rad = math.radians(heading_deg)
         cos_a = math.cos(rad)
@@ -220,12 +226,10 @@ class Building:
                 start_pt.y + dist * sin_a,
                 start_pt.z
             )
-            # Standard wall 19353 faces local Y, so rotate by heading_deg
             obj = self.add_object_local(p_model, panel_pos, 0.0, 0.0, heading_deg)
             if material_key:
                 self.apply_material_preset(obj, material_key, 0)
 
-            # If it's a window wall, embed modern glass pane
             if p_model == MODULAR_WALL_WIN:
                 glass_obj = self.add_object_local(GLASS_PANEL, panel_pos, 0.0, 0.0, heading_deg)
                 self.apply_material_preset(glass_obj, "glass", 0)
@@ -234,35 +238,25 @@ class Building:
                                door_wall: str = "south", door_index: int = 0,
                                ext_material: str = "wall_ext", floor_material: str = "floor",
                                ceiling_material: str = "ceiling"):
-        """Constructs an enclosed modular room with foundation, walls, ceiling, and entrance."""
         half_w = width / 2.0
         half_d = depth / 2.0
         wall_z = center.z + (height / 2.0)
 
-        # 1. Floor Slab (with slight foundation drop)
         self.build_slab_grid(center, width, depth, z_offset=0.0, material_key=floor_material)
-
-        # 2. Ceiling Slab
         self.build_slab_grid(center, width, depth, z_offset=height, material_key=ceiling_material)
 
-        # 3. Four Enclosing Walls
-        # South Wall (Facing -Y, heading = 0)
         sw_start = Vec3(center.x - half_w, center.y - half_d, wall_z)
         self.build_straight_wall(sw_start, width, 0.0, MODULAR_WALL, 3.20, ext_material, window_interval=2)
 
-        # North Wall (Facing +Y, heading = 180)
         nw_start = Vec3(center.x + half_w, center.y + half_d, wall_z)
         self.build_straight_wall(nw_start, width, 180.0, MODULAR_WALL, 3.20, ext_material, window_interval=2)
 
-        # East Wall (Facing +X, heading = 90)
         ew_start = Vec3(center.x + half_w, center.y - half_d, wall_z)
         self.build_straight_wall(ew_start, depth, 90.0, MODULAR_WALL, 3.20, ext_material, window_interval=2)
 
-        # West Wall (Facing -X, heading = 270)
         ww_start = Vec3(center.x - half_w, center.y + half_d, wall_z)
         self.build_straight_wall(ww_start, depth, 270.0, MODULAR_WALL, 3.20, ext_material, window_interval=2)
 
-        # 4. Corner Structural Columns (Square pillars)
         pillar_z = center.z + (height / 2.0)
         corners = [
             Vec3(center.x - half_w, center.y - half_d, pillar_z),
@@ -274,7 +268,6 @@ class Building:
             col_obj = self.add_object_local(MODULAR_PILLAR_S, c, 0.0, 0.0, 0.0)
             self.apply_material_preset(col_obj, "wall_accent", 0)
 
-        # 5. Central Ceiling Recessed Downlight
         light_pos = Vec3(center.x, center.y, center.z + height - 0.05)
         self.add_object_local(LIGHT_DOWNLIGHT, light_pos, 0.0, 0.0, 0.0)
 
@@ -284,51 +277,35 @@ class Building:
 # ==============================================================================
 
 def generate_modern_villa(name: str, origin: Vec3, heading: float = 0.0) -> Building:
-    """Generates a luxury 2-story modern minimalist villa with glass facade, balcony, and pool terrace."""
     b = Building(name, origin, heading, "modern_luxury")
-
-    # Dimensions
-    w = 16.0  # 5 panels wide (~16.0m)
-    d = 12.8  # 4 panels deep (~12.8m)
+    w = 16.0
+    d = 12.8
     story_h = 3.50
 
-    # Foundation Sub-base (Ground leveling)
     b.build_slab_grid(Vec3(0, 0, -0.2), w + 2.0, d + 2.0, z_offset=0.0, slab_model=MODULAR_SLAB_MED, step=5.0, material_key="roof")
-
-    # Ground Floor Living Area
     b.build_rectangular_room(Vec3(0, 0, 0), w, d, height=story_h, ext_material="wall_ext", floor_material="floor", ceiling_material="ceiling")
 
-    # Second Floor (Master Suite & Balcony)
-    # Slightly stepped back for modern architectural volumetric look
     w2 = 12.8
     d2 = 9.6
     b.build_rectangular_room(Vec3(-1.6, -1.6, story_h), w2, d2, height=story_h, ext_material="wall_accent", floor_material="floor_wood", ceiling_material="ceiling")
 
-    # Balcony Perimeter Railing on Second Floor
     railing_z = story_h + 0.60
     b.add_object_local(MODULAR_RAILING, Vec3(4.8, 3.2, railing_z), 0.0, 0.0, 0.0)
     b.add_object_local(MODULAR_RAILING, Vec3(1.6, 3.2, railing_z), 0.0, 0.0, 0.0)
     b.add_object_local(MODULAR_RAILING, Vec3(-1.6, 3.2, railing_z), 0.0, 0.0, 0.0)
 
-    # Modular Staircase connecting Ground to 2nd Floor
     stair_pos = Vec3(-4.8, 1.6, 0.0)
     b.add_object_local(MODULAR_STAIRS, stair_pos, 0.0, 0.0, 0.0)
-
-    # Modern Entrance Door
     b.add_object_local(INTERIOR_DOOR, Vec3(0, -6.4, 1.25), 0.0, 0.0, 0.0)
 
-    # Modern Neon Ambient Lighting Accent Strip at Roof Trim
     roof_z = (story_h * 2) + 0.05
     b.add_object_local(LIGHT_NEON_BLUE, Vec3(0, -d2/2.0, roof_z), 0.0, 0.0, 0.0)
     b.add_object_local(LIGHT_NEON_BLUE, Vec3(0, d2/2.0, roof_z), 0.0, 0.0, 0.0)
-
     return b
 
 
 def generate_office_building(name: str, origin: Vec3, heading: float = 0.0) -> Building:
-    """Generates a 3-story corporate office HQ with glass facades and reception lobby."""
     b = Building(name, origin, heading, "office_hq")
-
     w = 16.0
     d = 16.0
     story_h = 3.50
@@ -343,30 +320,23 @@ def generate_office_building(name: str, origin: Vec3, heading: float = 0.0) -> B
             floor_material="floor" if fl == 0 else "floor_wood",
             ceiling_material="ceiling"
         )
-        # Staircase on each floor
         if fl < floors - 1:
             b.add_object_local(MODULAR_STAIRS, Vec3(-5.0, 2.0, floor_z), 0.0, 0.0, 0.0)
 
-    # Roof Parapet Barrier
     roof_z = floors * story_h + 0.5
     b.add_object_local(MODULAR_RAILING, Vec3(0, -7.5, roof_z), 0.0, 0.0, 0.0)
     b.add_object_local(MODULAR_RAILING, Vec3(0, 7.5, roof_z), 0.0, 0.0, 0.0)
-
     return b
 
 
 def generate_industrial_warehouse(name: str, origin: Vec3, heading: float = 0.0) -> Building:
-    """Generates a large industrial warehouse with high clearance, corrugated metal and concrete floor."""
     b = Building(name, origin, heading, "industrial")
-
     w = 20.0
     d = 25.0
-    height = 7.0  # Double height clearance
+    height = 7.0
 
-    # Foundation / Floor Slab
     b.build_slab_grid(Vec3(0, 0, 0), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="floor")
 
-    # Double-height Walls (Layer 1: 0.0 to 3.5m, Layer 2: 3.5m to 7.0m)
     for layer_z in [1.75, 5.25]:
         half_w = w / 2.0
         half_d = d / 2.0
@@ -375,152 +345,128 @@ def generate_industrial_warehouse(name: str, origin: Vec3, heading: float = 0.0)
         b.build_straight_wall(Vec3(half_w, -half_d, layer_z), d, 90.0, MODULAR_WALL, 3.20, "wall_accent")
         b.build_straight_wall(Vec3(-half_w, half_d, layer_z), d, 270.0, MODULAR_WALL, 3.20, "wall_accent")
 
-    # High Industrial Roof
     b.build_slab_grid(Vec3(0, 0, height), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="ceiling")
 
-    # Suspended Industrial Fluorescent Fixtures
     for y_offset in [-8.0, 0.0, 8.0]:
         b.add_object_local(LIGHT_FLUORESCENT, Vec3(0, y_offset, height - 0.5), 0.0, 0.0, 0.0)
-
     return b
 
 
 def generate_coffee_shop(name: str, origin: Vec3, heading: float = 0.0) -> Building:
-    """Generates a cozy contemporary coffee shop / cafe with outdoor patio and storefront glass."""
     b = Building(name, origin, heading, "modern_luxury")
-
     w = 12.8
     d = 9.6
     story_h = 3.50
 
-    # Main Cafe Space
     b.build_rectangular_room(Vec3(0, 0, 0), w, d, height=story_h, ext_material="wall_accent", floor_material="floor_wood", ceiling_material="ceiling")
 
-    # Front Outdoor Patio Deck
     patio_d = 6.4
     b.build_slab_grid(Vec3(0, -(d/2.0 + patio_d/2.0), 0), w, patio_d, z_offset=0.0, material_key="floor_wood")
 
-    # Front Glass Storefront
     b.add_object_local(GLASS_STOREFRONT, Vec3(-2.0, -d/2.0, 1.75), 0.0, 0.0, 0.0)
     b.add_object_local(GLASS_STOREFRONT, Vec3(2.0, -d/2.0, 1.75), 0.0, 0.0, 0.0)
 
-    # Warm Downlights
     for x_spot in [-3.2, 0.0, 3.2]:
         b.add_object_local(LIGHT_DOWNLIGHT, Vec3(x_spot, 0, story_h - 0.05), 0.0, 0.0, 0.0)
-
     return b
 
 
 # ==============================================================================
-# 5. EXPORTERS (PAWN & TEXTURE STUDIO DATABASE)
+# 5. UNIVERSAL EXPORTERS (PAWN INCLUDE, STANDALONE FS, STREAMER)
 # ==============================================================================
 
-def export_pwn_code(building: Building, streamer: bool = True) -> str:
+def export_gamemode_include(building: Building) -> str:
+    """
+    Exports a modular PAWN include file (.inc) that any gamemode can #include.
+    Provides LoadMap_<Name>() and UnloadMap_<Name>() functions.
+    """
+    safe_name = building.name.replace(" ", "_").replace("-", "_")
+    obj_count = len(building.objects)
+    rem_count = len(building.removed_buildings)
+
     lines = []
     lines.append(f"// ============================================================================")
-    lines.append(f"// Map Generated by SAMP Architect - Antigravity")
-    lines.append(f"// Map Name: {building.name}")
-    lines.append(f"// Total Objects: {len(building.objects)}")
-    lines.append(f"// Origin: ({building.origin.x:.3f}, {building.origin.y:.3f}, {building.origin.z:.3f}) | Heading: {building.heading:.1f}")
-    lines.append(f"// ============================================================================\n")
+    lines.append(f"// Mapping Name: {building.name}")
+    lines.append(f"// Generated by SAMP Architect (Universal SA-MP & open.mp)")
+    lines.append(f"// Total Objects: {obj_count} | Removed Buildings: {rem_count}")
+    lines.append(f"// Coordinates: ({building.origin.x:.3f}, {building.origin.y:.3f}, {building.origin.z:.3f}) | Heading: {building.heading:.1f}")
+    lines.append(f"// ============================================================================")
+    lines.append(f"#if defined _inc_map_{safe_name.lower()}")
+    lines.append(f"    #endinput")
+    lines.append(f"#endif")
+    lines.append(f"#define _inc_map_{safe_name.lower()}\n")
 
+    if obj_count > 0:
+        lines.append(f"static g_MapObjects_{safe_name}[{obj_count}];\n")
+
+    lines.append(f"stock LoadMap_{safe_name}()")
+    lines.append(f"{{")
+
+    # Removed Buildings
+    if rem_count > 0:
+        lines.append(f"    // Removed Default World Buildings")
+        for rb in building.removed_buildings:
+            lines.append(f"    // Call inside OnPlayerConnect(playerid):")
+            lines.append(f"    // RemoveBuildingForPlayer(playerid, {rb.model}, {rb.x:.4f}, {rb.y:.4f}, {rb.z:.4f}, {rb.radius:.4f});")
+        lines.append("")
+
+    # Create Dynamic Objects
+    lines.append(f"    // Dynamic Objects")
     for i, obj in enumerate(building.objects):
-        var_name = f"obj_{i}"
-        if streamer:
-            lines.append(f"new {var_name} = CreateDynamicObject({obj.model}, {obj.x:.4f}, {obj.y:.4f}, {obj.z:.4f}, {obj.rx:.2f}, {obj.ry:.2f}, {obj.rz:.2f});")
-            for slot, mat in obj.materials.items():
-                lines.append(f'SetDynamicObjectMaterial({var_name}, {slot}, {mat["model"]}, "{mat["txd"]}", "{mat["name"]}", {mat["color"]});')
-            for slot, txt in obj.material_texts.items():
-                safe_txt = txt["text"].replace("\\", "\\\\").replace('"', '\\"').replace("\r", "").replace("\n", "\\n")
-                lines.append(f'SetDynamicObjectMaterialText({var_name}, {slot}, "{safe_txt}", {txt["size"]}, "{txt["font"]}", {txt["fontsize"]}, {txt["bold"]}, {txt["fontcolor"]}, {txt["backcolor"]}, {txt["align"]});')
-        else:
-            lines.append(f"new {var_name} = CreateObject({obj.model}, {obj.x:.4f}, {obj.y:.4f}, {obj.z:.4f}, {obj.rx:.2f}, {obj.ry:.2f}, {obj.rz:.2f});")
-            for slot, mat in obj.materials.items():
-                lines.append(f'SetObjectMaterial({var_name}, {slot}, {mat["model"]}, "{mat["txd"]}", "{mat["name"]}", {mat["color"]});')
-            for slot, txt in obj.material_texts.items():
-                safe_txt = txt["text"].replace("\\", "\\\\").replace('"', '\\"').replace("\r", "").replace("\n", "\\n")
-                lines.append(f'SetObjectMaterialText({var_name}, {slot}, "{safe_txt}", {txt["size"]}, "{txt["font"]}", {txt["fontsize"]}, {txt["bold"]}, {txt["fontcolor"]}, {txt["backcolor"]}, {txt["align"]});')
+        var = f"g_MapObjects_{safe_name}[{i}]"
+        lines.append(f"    {var} = CreateDynamicObject({obj.model}, {obj.x:.4f}, {obj.y:.4f}, {obj.z:.4f}, {obj.rx:.2f}, {obj.ry:.2f}, {obj.rz:.2f});")
+        for slot, mat in obj.materials.items():
+            lines.append(f'    SetDynamicObjectMaterial({var}, {slot}, {mat["model"]}, "{mat["txd"]}", "{mat["name"]}", {mat["color"]});')
+        for slot, txt in obj.material_texts.items():
+            safe_txt = txt["text"].replace("\\", "\\\\").replace('"', '\\"').replace("\r", "").replace("\n", "\\n")
+            lines.append(f'    SetDynamicObjectMaterialText({var}, {slot}, "{safe_txt}", {txt["size"]}, "{txt["font"]}", {txt["fontsize"]}, {txt["bold"]}, {txt["fontcolor"]}, {txt["backcolor"]}, {txt["align"]});')
+
+    lines.append(f"    return 1;")
+    lines.append(f"}}\n")
+
+    lines.append(f"stock UnloadMap_{safe_name}()")
+    lines.append(f"{{")
+    if obj_count > 0:
+        lines.append(f"    for(new i = 0; i < sizeof(g_MapObjects_{safe_name}); i++)")
+        lines.append(f"    {{")
+        lines.append(f"        if(IsValidDynamicObject(g_MapObjects_{safe_name}[i]))")
+        lines.append(f"        {{")
+        lines.append(f"            DestroyDynamicObject(g_MapObjects_{safe_name}[i]);")
+        lines.append(f"            g_MapObjects_{safe_name}[i] = 0;")
+        lines.append(f"        }}")
+        lines.append(f"    }}")
+    lines.append(f"    return 1;")
+    lines.append(f"}}")
 
     return "\n".join(lines)
 
 
-def export_to_texture_studio_import(building: Building, tstudio_root: str = "/root/texture-studio-bobi") -> str:
-    """Exports to Texture Studio's ImportMaps folder so in-game players can run /importmap."""
-    import_dir = os.path.join(tstudio_root, "scriptfiles", "tstudio", "ImportMaps")
-    os.makedirs(import_dir, exist_ok=True)
+def export_standalone_filterscript(building: Building) -> str:
+    """Exports a ready-to-compile standalone SA-MP Filterscript (.pwn)."""
+    safe_name = building.name.replace(" ", "_")
+    include_code = export_gamemode_include(building)
 
-    filename = f"{building.name.replace(' ', '_')}.pwn"
-    filepath = os.path.join(import_dir, filename)
+    lines = []
+    lines.append(f"#define FILTERSCRIPT")
+    lines.append(f"#include <a_samp>")
+    lines.append(f"#include <streamer>\n")
+    lines.append(include_code)
+    lines.append("")
+    lines.append(f"public OnFilterScriptInit()")
+    lines.append(f"{{")
+    lines.append(f"    print(\"\\n======================================\");")
+    lines.append(f"    print(\" [MAP] {building.name} Loaded ({len(building.objects)} Objects)\");")
+    lines.append(f"    print(\"======================================\\n\");")
+    lines.append(f"    LoadMap_{safe_name}();")
+    lines.append(f"    return 1;")
+    lines.append(f"}}\n")
+    lines.append(f"public OnFilterScriptExit()")
+    lines.append(f"{{")
+    lines.append(f"    UnloadMap_{safe_name}();")
+    lines.append(f"    return 1;")
+    lines.append(f"}}")
 
-    code = export_pwn_code(building, streamer=True)
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(code)
-
-    return filepath
-
-
-def export_to_texture_studio_db(building: Building, tstudio_root: str = "/root/texture-studio-bobi") -> str:
-    """Exports directly into Texture Studio's SQLite .db format in SavedMaps!"""
-    saved_dir = os.path.join(tstudio_root, "scriptfiles", "tstudio", "SavedMaps")
-    os.makedirs(saved_dir, exist_ok=True)
-
-    db_path = os.path.join(saved_dir, f"{building.name}.db")
-    if os.path.exists(db_path):
-        os.remove(db_path)
-
-    con = sqlite3.connect(db_path)
-    cur = con.cursor()
-
-    cur.execute("""
-        CREATE TABLE `Objects` (
-            IndexID INTEGER, ModelID INTEGER,
-            xPos REAL, yPos REAL, zPos REAL,
-            rxRot REAL, ryRot REAL, rzRot REAL,
-            TextureIndex TEXT, ColorIndex TEXT,
-            usetext INTEGER, FontFace INTEGER, FontSize INTEGER, FontBold INTEGER,
-            FontColor INTEGER, BackColor INTEGER, Alignment INTEGER, TextFontSize INTEGER,
-            ObjectText TEXT, GroupID INTEGER, `Note` TEXT DEFAULT '', `DrawDistance` REAL DEFAULT 300.0
-        )
-    """)
-    cur.execute("CREATE TABLE `RemovedBuildings` (ModelID INTEGER, xPos REAL, yPos REAL, zPos REAL, Range REAL)")
-    cur.execute("""
-        CREATE TABLE `Vehicles` (
-            IndexID INTEGER, CarModel INTEGER, CarColor1 INTEGER, CarColor2 INTEGER,
-            CarPaintJob INTEGER, CarSpawnX REAL, CarSpawnY REAL, CarSpawnZ REAL, CarSpawnFA REAL,
-            CarComponents TEXT, CarObjectRef TEXT, COX TEXT, COY TEXT, COZ TEXT, CORX TEXT, CORY TEXT, CORZ TEXT, `CarSiren` INTEGER DEFAULT 0
-        )
-    """)
-    cur.execute("""
-        CREATE TABLE `Settings` (
-            Version INTEGER DEFAULT 0, LastTime INTEGER DEFAULT 0, Author TEXT DEFAULT 'SAMP Architect',
-            SpawnX REAL DEFAULT 0.0, SpawnY REAL DEFAULT 0.0, SpawnZ REAL DEFAULT 0.0,
-            Interior INTEGER DEFAULT -1, VirtualWorld INTEGER DEFAULT -1
-        )
-    """)
-
-    cur.execute("""
-        INSERT INTO `Settings` (Version, LastTime, Author, SpawnX, SpawnY, SpawnZ)
-        VALUES (1, 0, 'SAMP Architect', ?, ?, ?)
-    """, (building.origin.x, building.origin.y, building.origin.z + 2.0))
-
-    for idx, obj in enumerate(building.objects):
-        tex_bytes = bytearray([128] * 20)
-        col_bytes = bytearray([128] * 20)
-
-        cur.execute("""
-            INSERT INTO `Objects` (
-                IndexID, ModelID, xPos, yPos, zPos, rxRot, ryRot, rzRot,
-                TextureIndex, ColorIndex, usetext, FontFace, FontSize, FontBold,
-                FontColor, BackColor, Alignment, TextFontSize, ObjectText, GroupID
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, '', 0)
-        """, (
-            idx, obj.model, obj.x, obj.y, obj.z, obj.rx, obj.ry, obj.rz,
-            bytes(tex_bytes), bytes(col_bytes)
-        ))
-
-    con.commit()
-    con.close()
-    return db_path
+    return "\n".join(lines)
 
 
 # ==============================================================================
@@ -528,7 +474,7 @@ def export_to_texture_studio_db(building: Building, tstudio_root: str = "/root/t
 # ==============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description="SAMP Architect 3D Generator")
+    parser = argparse.ArgumentParser(description="SAMP Architect - Universal 3D Mapping Engine for SA-MP & open.mp")
     parser.add_argument("--template", choices=["villa", "office", "warehouse", "cafe"], default="villa",
                         help="Architectural template to generate")
     parser.add_argument("--name", type=str, default="ArchitectBuilding", help="Building/Map name")
@@ -536,8 +482,8 @@ def main():
     parser.add_argument("--y", type=float, default=-1500.0, help="World Y coordinate")
     parser.add_argument("--z", type=float, default=20.0, help="World Z coordinate")
     parser.add_argument("--rot", type=float, default=0.0, help="World heading rotation (degrees)")
-    parser.add_argument("--export-pwn", type=str, help="Save standalone .pwn file")
-    parser.add_argument("--tstudio", action="store_true", default=True, help="Export directly to Texture Studio (ImportMaps + SavedMaps)")
+    parser.add_argument("--out-inc", type=str, help="Output path for universal PAWN include file (.inc)")
+    parser.add_argument("--out-fs", type=str, help="Output path for standalone filterscript (.pwn)")
 
     args = parser.parse_args()
 
@@ -560,19 +506,15 @@ def main():
 
     print(f"[✓] Architectural structure successfully generated! Total objects: {len(building.objects)}")
 
-    if args.tstudio:
-        pwn_path = export_to_texture_studio_import(building)
-        db_path = export_to_texture_studio_db(building)
-        print(f"[✓] Saved to Texture Studio ImportMaps: {pwn_path}")
-        print(f"[✓] Saved to Texture Studio SavedMaps (Database): {db_path}")
-        print(f"[i] In Texture Studio, you can immediately load it via: /loadmap {building.name}")
-        print(f"[i] Or import it via: /importmap {os.path.basename(pwn_path)}")
+    inc_file = args.out_inc or f"{building.name}.inc"
+    with open(inc_file, "w", encoding="utf-8") as f:
+        f.write(export_gamemode_include(building))
+    print(f"[✓] Saved Universal PAWN Include: {inc_file}")
 
-    if args.export_pwn:
-        code = export_pwn_code(building)
-        with open(args.export_pwn, "w") as f:
-            f.write(code)
-        print(f"[✓] Exported PAWN code to: {args.export_pwn}")
+    if args.out_fs:
+        with open(args.out_fs, "w", encoding="utf-8") as f:
+            f.write(export_standalone_filterscript(building))
+        print(f"[✓] Saved Standalone Filterscript: {args.out_fs}")
 
 if __name__ == "__main__":
     main()
