@@ -7,7 +7,23 @@ In SA-MP, objects are placed via world coordinates `(x, y, z)` and Euler rotatio
 
 ---
 
-## 1. Local-to-World Coordinate Transformation
+## 1. The Golden SA-MP Modular Grid Standards
+
+Extracted directly from collision bounding boxes in `modelsizes.db`:
+- **Single-Bay Unit**: `3.211m` width, `3.500m` height, `0.172m` thickness (`19353`)
+- **Half-Bay Unit**: `1.601m` width (`19426`)
+- **Triple-Bay Unit**: `9.633m` width (`19445`, `19448`)
+- **Triple-Height 3-Story Unit**: `10.500m` height (`19377`)
+- **Structural Concrete Grid**:
+  - `18762` (`Concrete1mx1mx5m`): 1.0m x 1.0m x 5.0m
+  - `18766` (`Concrete10mx1mx5m`): 10.0m x 1.0m x 5.0m
+  - `18765` (`Concrete10mx10mx5m`): 10.0m x 10.0m x 5.0m
+
+All building layouts should snap to multiples of **`3.211m`** (or `1.601m` for tight rooms) and vertical story heights of **`3.500m`**. This guarantees 100% airtight seams and mathematically zero Z-fighting.
+
+---
+
+## 2. Local-to-World Coordinate Transformation
 
 When designing a room or building, it is vastly easier to design in **Local Space** (where `(0, 0, 0)` is the center or corner of the building and `+Y` is forward) and then project every object into **World Space** with arbitrary position `(WX, WY, WZ)` and rotation `Heading` (degrees).
 
@@ -27,51 +43,45 @@ world_rz = (local_rz + heading_deg) % 360.0
 
 ---
 
-## 2. Wall Segment Snapping Formulas
-
-Standard modular wall `19353` has length `L = 3.20m` along its local Y-axis and thickness `T = 0.17m` along its local X-axis.
+## 3. Wall Segment Snapping Formulas
 
 ### Placing a Straight Wall of Length `TotalLength`:
 To span a distance `TotalLength` along direction angle `θ`:
-1. Number of full panels: `N = int(TotalLength / 3.20)`
-2. Remainder distance: `Rem = TotalLength - (N * 3.20)`
-3. For each panel `i` from `0` to `N-1`:
-   - Offset along wall line: `s = (i + 0.5) * 3.20`
-   - Position:
-     `px = start_x + s * cos(θ)`
-     `py = start_y + s * sin(θ)`
-     `pz = floor_z + (WallHeight / 2.0)`
-     `rot_z = math.degrees(θ)`
+1. Use triple-bay panels `19445` (9.633m) for long spans: `N_triple = int(TotalLength / 9.633)`
+2. Remainder is filled with single-bay `19353` (3.211m): `N_single = int((TotalLength % 9.633) / 3.211)`
+3. Any small remaining fraction is closed with half-bay `19426` (1.601m).
 
-### Seamless 90-Degree Corner Joints:
+### Airtight 90-Degree Corner Joints:
 To avoid gaps or overlapping glitching textures (Z-fighting) at corners:
 - Outer corner offset adjustment:
-  `Corner_X = Outer_Boundary - (Wall_Thickness / 2.0)`
-- Or place modular corner column `19356` or square pillar `19363` centered at the exact vertex `(Corner_X, Corner_Y)` with dimension `0.40m x 0.40m`.
+  `Corner_X = Outer_Boundary - (Wall_Thickness / 2.0)` where `Wall_Thickness = 0.172m`.
+- Or place corner wall `19356` or structural column `18762` (`1.0m x 1.0m`) centered at the vertex.
 
 ---
 
-## 3. Floor and Ceiling Slab Grid Calculation
+## 4. Normal Offset Rule for Zero Z-Fighting Overlays
 
-For a room of width `W` and depth `D`:
-- Grid step for `19359` (standard slab): `Step = 3.20m`
-- Grid step for `19360` (large slab): `Step = 5.00m`
-- For floor: `Z = Base_Z + 0.10m`
-- For ceiling: `Z = Base_Z + Story_Height - 0.10m`
-- Upper floor: `Z = Base_Z + Story_Height + 0.10m`
+When applying wainscoting, wall slat screens (`19939`), signboards (`19482`), or poster decals (`18066`) over solid walls or floors:
+- **Surface Normal Vector**: `n = (cos(θ + 90°), sin(θ + 90°))`
+- **Offset Distance**: `d = +0.025m` to `+0.035m` (Never place at `0.000m` offset, which produces flickering Z-fighting).
+- Position of overlay object:
+  `overlay_x = wall_x + d * cos(rad + π/2)`
+  `overlay_y = wall_y + d * sin(rad + π/2)`
+  `overlay_z = wall_z`
 
 ---
 
-## 4. Staircase Rise & Run Calculation
+## 5. Staircase Rise & Run Calculation
 
 Modular staircase `19364` is designed for:
-- Standard floor rise: `ΔZ = 3.50m`
-- Horizontal run: `ΔY = 5.00m`
-- Width: `1.80m`
+- Standard floor rise: `ΔZ = 3.500m` (exact match to `19353` wall height!)
+- Horizontal run: `ΔY = 5.000m`
+- Width: `1.800m`
 
 Placement:
 - Place base at bottom floor edge `(X_stair, Y_stair, Base_Z)`.
 - Center point of staircase:
-  `Z_center = Base_Z + (3.50 / 2.0) = Base_Z + 1.75m`
-  `Y_center = Y_stair + (5.00 / 2.0) = Y_stair + 2.50m`
+  `Z_center = Base_Z + (3.500 / 2.0) = Base_Z + 1.750m`
+  `Y_center = Y_stair + (5.000 / 2.0) = Y_stair + 2.500m`
 - Cut an opening in the upper ceiling slab of at least `2.0m x 4.0m` directly above the staircase so the player ped's head does not collide with the ceiling while walking up.
+

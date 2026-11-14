@@ -47,7 +47,7 @@ When the user asks you to design or build a mapping:
        ▼
 [4. Generation & Universal PAWN Export]
    - Run the generator script:
-     `python3 scripts/samp_architect.py --template <template> --name <Name> --x <X> --y <Y> --z <Z> --rot <Rot> --out-inc <path.inc>`
+     `python3 scripts/samp_architect.py --template <villa|office|warehouse|cafe|dealership|police|hospital> --name <Name> --x <X> --y <Y> --z <Z> --rot <Rot> --out-inc <path.inc> --out-fs <path.pwn>`
    - Outputs:
      - Modular Include (`.inc`) with `LoadMap_<Name>()` and `UnloadMap_<Name>()`.
      - Standalone Filterscript (`.pwn`) ready to compile with pawncc.

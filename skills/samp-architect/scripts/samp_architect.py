@@ -55,43 +55,97 @@ class Vec3:
 # 2. VERIFIED SA-MP MODULAR OBJECTS & TEXTURE PALETTES
 # ==============================================================================
 
-MODULAR_WALL = 19353       # 3.20m width, 3.50m height, 0.17m thick
-MODULAR_WALL_WIN = 19354   # Wall with centered window cutout
-MODULAR_WALL_DOOR = 19355  # Wall with centered doorway
-MODULAR_CORNER = 19356     # Corner column
-MODULAR_WALL_HALF = 19357  # 1.60m width
-MODULAR_WALL_QTR = 19358   # 0.80m width
-MODULAR_SLAB = 19359       # 3.20m x 3.20m floor/ceiling slab
-MODULAR_SLAB_MED = 19360   # 5.00m x 5.00m floor/ceiling slab
-MODULAR_SLAB_LRG = 19361   # 10.00m x 10.00m floor/foundation slab
-MODULAR_PILLAR_R = 19362   # Round cylindrical column
-MODULAR_PILLAR_S = 19363   # Square structural column (0.40m)
-MODULAR_STAIRS = 19364     # 3.50m rise, 5.00m run
-MODULAR_RAILING = 19367    # Balcony/terrace safety railing (3.20m)
-GLASS_PANEL = 19447        # Seamless tinted glass panel
-GLASS_STOREFRONT = 19445   # Commercial storefront glass
-INTERIOR_DOOR = 1491       # Standard interior wood/glass door
-LIGHT_DOWNLIGHT = 19894    # Modern recessed ceiling spotlight
-LIGHT_FLUORESCENT = 19896  # Commercial ceiling fluorescent light
-LIGHT_NEON_BLUE = 19172    # Cyan neon accent tube
-LIGHT_NEON_RED = 19173     # Red neon accent tube
-LIGHT_NEON_GREEN = 19174   # Green neon accent tube
-LIGHT_OMNI = 18646         # Ambient white light flare
+# Modular Wall & Structure Geometry (Exact collision AABB dimensions)
+MODULAR_WALL = 19353              # 0.172m x 3.211m x 3.500m (Base 1-Bay Panel)
+MODULAR_WALL_WIN = 19354          # 0.172m x 3.211m x 3.500m (Window cutout)
+MODULAR_WALL_DOOR = 19355         # 0.172m x 3.211m x 3.500m (Door cutout)
+MODULAR_CORNER = 19356            # 0.172m x 3.211m x 3.500m (Corner transition)
+MODULAR_WALL_HALF = 19426         # 0.172m x 1.601m x 3.500m (Half-Bay narrow filler)
+MODULAR_WALL_TRIPLE = 19445       # 0.172m x 9.633m x 3.500m (Triple-Bay wide panel)
+MODULAR_WALL_TRIPLE_GLASS = 19448 # 0.172m x 9.633m x 3.500m (Triple-Bay curtain glass)
+MODULAR_WALL_3STORY = 19377       # 0.172m x 9.633m x 10.500m (Continuous 3-story panel)
+
+# Floors & Foundations
+MODULAR_SLAB = 19359              # 3.211m x 3.211m x 0.20m floor/ceiling slab
+MODULAR_SLAB_MED = 19360          # 5.00m x 5.00m floor/ceiling slab
+MODULAR_SLAB_LRG = 19361          # 10.00m x 10.00m floor/foundation slab
+MODULAR_SLAB_GIANT = 18344        # 196.8m x 254.2m concourse / runway plate
+CONCRETE_FOUNDATION_10x10 = 18765 # 10.00m x 10.00m x 5.00m deep subterranean base
+
+# Structural Columns & Heavy Beams
+CONCRETE_PILLAR_1x1 = 18762       # 1.00m x 1.00m x 5.00m column (Rotated 90 deg = 5m horizontal beam)
+CONCRETE_BEAM_10x1 = 18766        # 10.00m x 1.00m x 5.00m heavy beam / fascia / foundation curb
+MODULAR_PILLAR_R = 19362          # Round cylindrical column
+MODULAR_PILLAR_S = 19363          # Square structural column (0.40m x 0.40m)
+MODULAR_STAIRS = 19364            # 3.500m rise, 5.000m run modular staircase
+STAIR_TREAD = 19939               # 0.437m x 1.000m x 0.031m stair step / decorative wood slat
+MODULAR_RAILING = 19367           # Balcony/terrace safety railing (3.211m)
+MODULAR_FASCIA = 19365            # Clean top parapet fascia cap
+
+# Overlays, Signage & Doors
+POSTER_OVERLAY = 18066            # 0 Z-fighting normal offset overlay decal panel
+SIGNBOARD_SURFACE = 19482         # Signboard box surface for MaterialText
+RECEPTION_COUNTER = 18980         # Modern reception / booking / service desk
+GLASS_PANEL = 19447               # Seamless tinted glass panel
+GLASS_STOREFRONT = 19445          # Commercial storefront glass
+INTERIOR_DOOR = 1491              # Standard interior wood/glass door
+SECURITY_DOOR = 1495              # Heavy security / fire door
+GLASS_SLIDING_DOOR = 19856        # Luxury glass patio sliding door
+
+# Lighting
+LIGHT_DOWNLIGHT = 19894           # Modern recessed ceiling spotlight
+LIGHT_FLUORESCENT = 19896         # Commercial ceiling fluorescent light
+LIGHT_NEON_BLUE = 19172           # Cyan neon accent tube
+LIGHT_NEON_RED = 19173            # Red neon accent tube
+LIGHT_NEON_GREEN = 19174          # Green neon accent tube
+LIGHT_OMNI = 18646                # Ambient white light flare
 
 TEXTURE_PALETTES = {
     "modern_luxury": {
-        "wall_ext": {"model": 14668, "txd": "711c", "name": "cj_white_wall2", "color": 0},
-        "wall_accent": {"model": 10101, "txd": "2notherbuildsfe", "name": "sl_vicwall01", "color": 0},
+        "wall_ext": {"model": 10765, "txd": "airportgnd_sfse", "name": "white", "color": 0},
+        "wall_accent": {"model": 14581, "txd": "ab_mafiasuitea", "name": "cof_wood2", "color": 0},
+        "wall_secondary": {"model": 18646, "txd": "matcolours", "name": "grey-93-percent", "color": 0},
         "floor": {"model": 14668, "txd": "711c", "name": "CJ_7_11_TILE", "color": 0},
-        "floor_wood": {"model": 14668, "txd": "711c", "name": "CJ_CHIP_M2", "color": 0},
+        "floor_wood": {"model": 14479, "txd": "skuzzy_motelmain", "name": "mp_cj_laminate1", "color": 0},
+        "ceiling": {"model": 10765, "txd": "airportgnd_sfse", "name": "white", "color": 0},
+        "roof": {"model": 10765, "txd": "airportgnd_sfse", "name": "black64", "color": 0},
+        "glass": {"model": 16646, "txd": "a51_alpha", "name": "stanwind_nt", "color": 0},
+    },
+    "dealership": {
+        "wall_ext": {"model": 18646, "txd": "matcolours", "name": "grey-80-percent", "color": 0},
+        "wall_accent": {"model": 10765, "txd": "airportgnd_sfse", "name": "black64", "color": 0},
+        "wall_secondary": {"model": 18646, "txd": "matcolours", "name": "grey-93-percent", "color": 0},
+        "floor": {"model": 14479, "txd": "skuzzy_motelmain", "name": "mp_cj_laminate1", "color": 0},
+        "floor_outdoor": {"model": 10765, "txd": "bistro", "name": "mottled_grey_64hv", "color": 0},
+        "curb": {"model": 10765, "txd": "barrierblk", "name": "yellow_64", "color": 0},
+        "ceiling": {"model": 14668, "txd": "711c", "name": "gun_ceiling1128", "color": 0},
+        "roof": {"model": 10765, "txd": "airportgnd_sfse", "name": "black64", "color": 0},
+        "glass": {"model": 16646, "txd": "a51_alpha", "name": "stanwind_nt", "color": 0},
+    },
+    "police_polda": {
+        "wall_ext": {"model": 6205, "txd": "lawartg", "name": "luxorwall01_128", "color": 0},
+        "wall_accent": {"model": 18765, "txd": "vgshpground", "name": "vegaspawnwall02_128", "color": 0},
+        "wall_secondary": {"model": 18646, "txd": "matcolours", "name": "grey-93-percent", "color": 0},
+        "floor": {"model": 18765, "txd": "gazlaw1", "name": "law_gazwhitefloor", "color": 0},
+        "floor_cell": {"model": 18765, "txd": "cityhall_lan", "name": "man_cellarfloor128", "color": 0},
         "ceiling": {"model": 14668, "txd": "711c", "name": "gun_ceiling1128", "color": 0},
         "roof": {"model": 10101, "txd": "2notherbuildsfe", "name": "ws_rooftarmac1", "color": 0},
-        "glass": {"model": 14668, "txd": "711c", "name": "CJ_7_11_win", "color": 0},
+        "glass": {"model": 18065, "txd": "ab_sfammumain", "name": "shelf_glas", "color": 0},
+    },
+    "hospital_clinic": {
+        "wall_ext": {"model": 10765, "txd": "eastbeach4a_lae2", "name": "bluestucco1", "color": 0},
+        "wall_accent": {"model": 10765, "txd": "stad_tag", "name": "was_swr_wall_blue", "color": 0},
+        "wall_secondary": {"model": 18646, "txd": "matcolours", "name": "grey-90-percent", "color": 0},
+        "floor": {"model": 14668, "txd": "vegashse2", "name": "badhousewalld06_128", "color": 0},
+        "ceiling": {"model": 14668, "txd": "711c", "name": "gun_ceiling3", "color": 0},
+        "roof": {"model": 10101, "txd": "2notherbuildsfe", "name": "ws_rooftarmac1", "color": 0},
+        "glass": {"model": 16646, "txd": "a51_alpha", "name": "stanwind_nt", "color": 0},
     },
     "industrial": {
-        "wall_ext": {"model": 10101, "txd": "2notherbuildsfe", "name": "sl_vicbrikwall01", "color": 0},
-        "wall_accent": {"model": 9514, "txd": "711_sfw", "name": "rebrckwall_128", "color": 0},
-        "floor": {"model": 9514, "txd": "711_sfw", "name": "dt_carpark_line_texture", "color": 0},
+        "wall_ext": {"model": 10765, "txd": "warehus_las2", "name": "newall1-1128", "color": 0},
+        "wall_accent": {"model": 10765, "txd": "stormdrain", "name": "macbrij2_lae", "color": 0},
+        "wall_secondary": {"model": 16640, "txd": "a51", "name": "ws_metalpanel1", "color": 0},
+        "floor": {"model": 16640, "txd": "a51", "name": "ws_stationfloor", "color": 0},
         "ceiling": {"model": 14668, "txd": "711c", "name": "gun_ceiling3", "color": 0},
         "roof": {"model": 10101, "txd": "2notherbuildsfe", "name": "ws_rooftarmac1", "color": 0},
         "glass": {"model": 14668, "txd": "711c", "name": "CJ_7_11_win", "color": 0},
@@ -100,10 +154,10 @@ TEXTURE_PALETTES = {
         "wall_ext": {"model": 9514, "txd": "711_sfw", "name": "mono1_sfe", "color": 0},
         "wall_accent": {"model": 9514, "txd": "711_sfw", "name": "mono2_sfe", "color": 0},
         "floor": {"model": 14668, "txd": "711c", "name": "bwtilebroth", "color": 0},
-        "floor_wood": {"model": 14668, "txd": "711c", "name": "CJ_CHIP_M2", "color": 0},
+        "floor_wood": {"model": 14479, "txd": "skuzzy_motelmain", "name": "mp_cj_laminate1", "color": 0},
         "ceiling": {"model": 14668, "txd": "711c", "name": "gun_ceiling1128", "color": 0},
         "roof": {"model": 10101, "txd": "2notherbuildsfe", "name": "ws_rooftarmac1", "color": 0},
-        "glass": {"model": 14668, "txd": "711c", "name": "CJ_7_11_win", "color": 0},
+        "glass": {"model": 16646, "txd": "a51_alpha", "name": "stanwind_nt", "color": 0},
     },
     "cyberpunk": {
         "wall_ext": {"model": 10101, "txd": "2notherbuildsfe", "name": "ws_rooftarmac1", "color": 0xFF14141E},
@@ -462,6 +516,180 @@ def generate_coffee_shop(name: str, origin: Vec3, heading: float = 0.0) -> Build
     return b
 
 
+def generate_car_dealership(name: str, origin: Vec3, heading: float = 0.0) -> Building:
+    """
+    Elite Modern Car Dealership & Showroom:
+    - 28.8m wide x 19.2m deep double-height showroom (7.0m ceiling).
+    - Storefront glass curtain wall (19448) with matte black structural pillars (18762).
+    - Cantilevered entrance canopy (18766).
+    - Glossy Scandinavian laminate showroom floor + outdoor display tarmac forecourt.
+    - Illuminated dealer sign (19482) with MaterialText.
+    """
+    b = Building(name, origin, heading, "dealership")
+    w = 28.899  # Exactly 3 triple bays (3 * 9.633m)
+    d = 19.266  # Exactly 2 triple bays (2 * 9.633m)
+    h = 7.000   # Double-height showroom
+
+    # 1. Base Foundation & Indoor Showroom Floor
+    b.build_slab_grid(Vec3(0, 0, 0), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="floor")
+
+    # 2. Outdoor Display Forecourt (South Side)
+    forecourt_d = 10.0
+    b.build_slab_grid(Vec3(0, -(d/2.0 + forecourt_d/2.0), -0.05), w + 4.0, forecourt_d, z_offset=0.0,
+                      slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="floor_outdoor")
+
+    # 3. Double-Height Glass Curtain Wall (Front / South Facade)
+    b.build_curtain_wall_facade(
+        start_pos=Vec3(-w/2.0, -d/2.0, 0),
+        length=w,
+        height=h,
+        heading_deg=0.0,
+        column_span=9.633,
+        column_model=CONCRETE_PILLAR_1x1,
+        glass_model=MODULAR_WALL_TRIPLE_GLASS,
+        fascia_model=MODULAR_FASCIA,
+        material_key_column="wall_accent",
+        material_key_glass="glass",
+        material_key_fascia="roof"
+    )
+
+    # 4. Enclosing Solid Side & Rear Walls (North, East, West)
+    for layer_z in [1.75, 5.25]:
+        half_w = w / 2.0
+        half_d = d / 2.0
+        # Rear (North)
+        b.build_straight_wall(Vec3(half_w, half_d, layer_z), w, 180.0, MODULAR_WALL_TRIPLE, 9.633, "wall_ext")
+        # East Wall
+        b.build_straight_wall(Vec3(half_w, -half_d, layer_z), d, 90.0, MODULAR_WALL_TRIPLE, 9.633, "wall_secondary")
+        # West Wall
+        b.build_straight_wall(Vec3(-half_w, half_d, layer_z), d, 270.0, MODULAR_WALL_TRIPLE, 9.633, "wall_secondary")
+
+    # 5. Roof Slab
+    b.build_slab_grid(Vec3(0, 0, h), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="roof")
+
+    # 6. Entrance Canopy & Signage
+    canopy = b.add_object_local(CONCRETE_BEAM_10x1, Vec3(0, -d/2.0 - 2.5, 4.2), 90.0, 0.0, 0.0)
+    b.apply_material_preset(canopy, "wall_accent")
+
+    sign = b.add_object_local(SIGNBOARD_SURFACE, Vec3(0, -d/2.0 - 0.2, 5.5), 0.0, 0.0, 0.0)
+    sign.set_material_text(0, "{ffcc00}PRESTIGE MOTORS {ffffff}| SHOWROOM", material_size=130, font="Arial Black", font_size=40, bold=1, font_color=0xFFFFFFFF, back_color=0xCC000000, align=1)
+
+    # 7. Reception Desk & Downlights
+    desk = b.add_object_local(RECEPTION_COUNTER, Vec3(0, -d/4.0, 0.5), 0.0, 0.0, 180.0)
+    b.apply_material_preset(desk, "wall_accent")
+
+    for x_spot in [-9.6, 0.0, 9.6]:
+        for y_spot in [-4.8, 4.8]:
+            b.add_object_local(LIGHT_DOWNLIGHT, Vec3(x_spot, y_spot, h - 0.05), 0.0, 0.0, 0.0)
+
+    return b
+
+
+def generate_police_station(name: str, origin: Vec3, heading: float = 0.0) -> Building:
+    """
+    Official Police Department HQ (Polda Standard):
+    - Classical limestone/granite facade (lawartg:luxorwall01_128).
+    - Polished government terrazzo lobby (gazlaw1:law_gazwhitefloor).
+    - Secure holding cell block with dark cellar concrete (cityhall_lan:man_cellarfloor128).
+    - Central booking counter (18980) & official illuminated badge signage.
+    """
+    b = Building(name, origin, heading, "police_polda")
+    w = 28.899  # 3 bays of 9.633m
+    d = 16.055  # 5 bays of 3.211m
+    h = 7.000   # 2 stories
+
+    # 1. Base Foundation & Lobby Floor
+    b.build_slab_grid(Vec3(0, 0, 0), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="floor")
+
+    # 2. Main Building Perimeter
+    for layer_z in [1.75, 5.25]:
+        half_w = w / 2.0
+        half_d = d / 2.0
+        # Front Wall (South) with entrance opening
+        b.build_straight_wall(Vec3(-half_w, -half_d, layer_z), half_w - 3.2, 0.0, MODULAR_WALL, 3.211, "wall_ext")
+        b.build_straight_wall(Vec3(3.2, -half_d, layer_z), half_w - 3.2, 0.0, MODULAR_WALL, 3.211, "wall_ext")
+        # Rear Wall (North)
+        b.build_straight_wall(Vec3(half_w, half_d, layer_z), w, 180.0, MODULAR_WALL, 3.211, "wall_accent")
+        # East Wall
+        b.build_straight_wall(Vec3(half_w, -half_d, layer_z), d, 90.0, MODULAR_WALL, 3.211, "wall_ext")
+        # West Wall
+        b.build_straight_wall(Vec3(-half_w, half_d, layer_z), d, 270.0, MODULAR_WALL, 3.211, "wall_ext")
+
+    # 3. Second Floor Intermediate Slab & Roof
+    b.build_slab_grid(Vec3(0, 0, 3.50), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="ceiling")
+    b.build_slab_grid(Vec3(0, 0, h), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="roof")
+
+    # 4. Entrance Portal & Signboard
+    portal_l = b.add_object_local(CONCRETE_PILLAR_1x1, Vec3(-2.0, -d/2.0 - 0.5, 2.5), 0.0, 0.0, 0.0)
+    portal_r = b.add_object_local(CONCRETE_PILLAR_1x1, Vec3(2.0, -d/2.0 - 0.5, 2.5), 0.0, 0.0, 0.0)
+    b.apply_material_preset(portal_l, "wall_accent")
+    b.apply_material_preset(portal_r, "wall_accent")
+
+    sign = b.add_object_local(SIGNBOARD_SURFACE, Vec3(0, -d/2.0 - 0.5, 4.2), 0.0, 0.0, 0.0)
+    sign.set_material_text(0, "{ffffff}POLDA METROPOLITAN {ffcc00}POLICE DEPT", material_size=130, font="Arial Black", font_size=36, bold=1, font_color=0xFFFFFFFF, back_color=0xCC001133, align=1)
+
+    # 5. Central Booking & Reception Desk
+    desk = b.add_object_local(RECEPTION_COUNTER, Vec3(0, -d/4.0, 0.5), 0.0, 0.0, 180.0)
+    b.apply_material_preset(desk, "wall_accent")
+
+    # 6. Holding Cell Partition (East Wing)
+    cell_wall_x = w/2.0 - 6.422
+    b.build_straight_wall(Vec3(cell_wall_x, -d/2.0, 1.75), d, 90.0, MODULAR_WALL, 3.211, "wall_accent")
+
+    for x_spot in [-8.0, 0.0, 8.0]:
+        b.add_object_local(LIGHT_DOWNLIGHT, Vec3(x_spot, 0, 3.45), 0.0, 0.0, 0.0)
+
+    return b
+
+
+def generate_hospital_clinic(name: str, origin: Vec3, heading: float = 0.0) -> Building:
+    """
+    Emergency Hospital & Medical Clinic (UGD Standard):
+    - Clinical soft blue walls (bluestucco1) with medical guide stripes.
+    - High-visibility emergency signage & triage reception desk.
+    - Sanitized linoleum/tile floor (badhousewalld06_128).
+    - Wide triage ambulance drop-off portal.
+    """
+    b = Building(name, origin, heading, "hospital_clinic")
+    w = 28.899  # 3 bays of 9.633m
+    d = 16.055  # 5 bays of 3.211m
+    h = 3.500   # Single story open interior
+
+    # 1. Floor & Roof
+    b.build_slab_grid(Vec3(0, 0, 0), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="floor")
+    b.build_slab_grid(Vec3(0, 0, h), w, d, z_offset=0.0, slab_model=MODULAR_SLAB_LRG, step=10.0, material_key="ceiling")
+
+    # 2. Exterior Perimeter Walls
+    half_w = w / 2.0
+    half_d = d / 2.0
+    # Front Wall (South) with wide emergency entrance
+    b.build_straight_wall(Vec3(-half_w, -half_d, 1.75), half_w - 4.8, 0.0, MODULAR_WALL, 3.211, "wall_ext")
+    b.build_straight_wall(Vec3(4.8, -half_d, 1.75), half_w - 4.8, 0.0, MODULAR_WALL, 3.211, "wall_ext")
+    # Rear Wall (North)
+    b.build_straight_wall(Vec3(half_w, half_d, 1.75), w, 180.0, MODULAR_WALL, 3.211, "wall_secondary")
+    # East Wall
+    b.build_straight_wall(Vec3(half_w, -half_d, 1.75), d, 90.0, MODULAR_WALL, 3.211, "wall_ext")
+    # West Wall
+    b.build_straight_wall(Vec3(-half_w, half_d, 1.75), d, 270.0, MODULAR_WALL, 3.211, "wall_ext")
+
+    # 3. Emergency UGD Signage
+    sign = b.add_object_local(SIGNBOARD_SURFACE, Vec3(0, -half_d - 0.2, 3.2), 0.0, 0.0, 0.0)
+    sign.set_material_text(0, "{ff0000}[ + ] EMERGENCY {ffffff}| UGD 24 JAM", material_size=130, font="Arial Black", font_size=38, bold=1, font_color=0xFFFFFFFF, back_color=0xCCFFFFFF, align=1)
+
+    # 4. Triage Desk
+    desk = b.add_object_local(RECEPTION_COUNTER, Vec3(0, -half_d + 4.0, 0.5), 0.0, 0.0, 180.0)
+    b.apply_material_preset(desk, "wall_accent")
+
+    # 5. Treatment Room Partitions
+    b.build_straight_wall(Vec3(-half_w + 9.633, 0.0, 1.75), half_d, 90.0, MODULAR_WALL, 3.211, "wall_secondary")
+    b.build_straight_wall(Vec3(half_w - 9.633, 0.0, 1.75), half_d, 90.0, MODULAR_WALL, 3.211, "wall_secondary")
+
+    for x_spot in [-9.6, 0.0, 9.6]:
+        b.add_object_local(LIGHT_DOWNLIGHT, Vec3(x_spot, 0, h - 0.05), 0.0, 0.0, 0.0)
+
+    return b
+
+
 # ==============================================================================
 # 5. UNIVERSAL EXPORTERS (PAWN INCLUDE, STANDALONE FS, STREAMER)
 # ==============================================================================
@@ -591,7 +819,7 @@ def export_standalone_filterscript(building: Building) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="SAMP Architect - Universal 3D Mapping Engine for SA-MP & open.mp")
-    parser.add_argument("--template", choices=["villa", "office", "warehouse", "cafe"], default="villa",
+    parser.add_argument("--template", choices=["villa", "office", "warehouse", "cafe", "dealership", "police", "hospital"], default="villa",
                         help="Architectural template to generate")
     parser.add_argument("--name", type=str, default="ArchitectBuilding", help="Building/Map name")
     parser.add_argument("--x", type=float, default=1200.0, help="World X coordinate")
@@ -617,6 +845,12 @@ def main():
         building = generate_industrial_warehouse(args.name, origin, args.rot)
     elif args.template == "cafe":
         building = generate_coffee_shop(args.name, origin, args.rot)
+    elif args.template == "dealership":
+        building = generate_car_dealership(args.name, origin, args.rot)
+    elif args.template == "police":
+        building = generate_police_station(args.name, origin, args.rot)
+    elif args.template == "hospital":
+        building = generate_hospital_clinic(args.name, origin, args.rot)
     else:
         building = generate_modern_villa(args.name, origin, args.rot)
 

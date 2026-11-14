@@ -58,3 +58,22 @@ Every realistic building must contain the following core architectural layers:
 - **Zero Collision with GTA World**: When mapping at real GTA SA landmarks (e.g. LS Airport, Vinewood, Santa Maria Beach, Idlewood), ALWAYS inspect and remove overlapping default GTA SA buildings, lampposts, and clutter using `RemoveBuildingForPlayer`.
 - **Integrated Include & Script Removal**: Always export removals via `RemoveBuildings_<Name>(playerid)` so that both modular includes and standalone filterscripts cleanly clear conflicting default objects upon player connection.
 
+## 8. The Modular Grid Standards (Precision Snapping)
+- All structural walls and rooms MUST snap to multiples of the standard modular unit:
+  - **Single Bay**: `3.211m` (`19353`, `19354`, `19355`)
+  - **Half Bay**: `1.601m` (`19426`)
+  - **Triple Bay**: `9.633m` (`19445`, `19448`)
+  - **Single Story Height**: `3.500m`
+  - **Triple Story Continuous Height**: `10.500m` (`19377`)
+- Use structural framing models `18762` (1m x 1m x 5m) and `18766` (10m x 1m x 5m) for crisp pilasters, canopies, roof trims, and curbs.
+
+## 9. Dynamic Signage & MaterialText Best Practices
+- Place signboards using flat signage model `19482` or structural plate `18066`.
+- Use clean modern fonts: `Arial`, `Calibri`, or `Arial Black`.
+- Apply appropriate font sizes:
+  - Room / Door signs: Size `20` to `28`
+  - Department / Zone signs: Size `50` to `80`
+  - Exterior Building Facades: Size `100` to `180`
+- Use hex formatting e.g. `{ffffff}EMERGENCY` or `{ffcc00}DEALERSHIP` for clean visual pop.
+
+
