@@ -431,13 +431,15 @@ def export_pwn_code(building: Building, streamer: bool = True) -> str:
             for slot, mat in obj.materials.items():
                 lines.append(f'SetDynamicObjectMaterial({var_name}, {slot}, {mat["model"]}, "{mat["txd"]}", "{mat["name"]}", {mat["color"]});')
             for slot, txt in obj.material_texts.items():
-                lines.append(f'SetDynamicObjectMaterialText({var_name}, {slot}, "{txt["text"]}", {txt["size"]}, "{txt["font"]}", {txt["fontsize"]}, {txt["bold"]}, {txt["fontcolor"]}, {txt["backcolor"]}, {txt["align"]});')
+                safe_txt = txt["text"].replace("\\", "\\\\").replace('"', '\\"').replace("\r", "").replace("\n", "\\n")
+                lines.append(f'SetDynamicObjectMaterialText({var_name}, {slot}, "{safe_txt}", {txt["size"]}, "{txt["font"]}", {txt["fontsize"]}, {txt["bold"]}, {txt["fontcolor"]}, {txt["backcolor"]}, {txt["align"]});')
         else:
             lines.append(f"new {var_name} = CreateObject({obj.model}, {obj.x:.4f}, {obj.y:.4f}, {obj.z:.4f}, {obj.rx:.2f}, {obj.ry:.2f}, {obj.rz:.2f});")
             for slot, mat in obj.materials.items():
                 lines.append(f'SetObjectMaterial({var_name}, {slot}, {mat["model"]}, "{mat["txd"]}", "{mat["name"]}", {mat["color"]});')
             for slot, txt in obj.material_texts.items():
-                lines.append(f'SetObjectMaterialText({var_name}, {slot}, "{txt["text"]}", {txt["size"]}, "{txt["font"]}", {txt["fontsize"]}, {txt["bold"]}, {txt["fontcolor"]}, {txt["backcolor"]}, {txt["align"]});')
+                safe_txt = txt["text"].replace("\\", "\\\\").replace('"', '\\"').replace("\r", "").replace("\n", "\\n")
+                lines.append(f'SetObjectMaterialText({var_name}, {slot}, "{safe_txt}", {txt["size"]}, "{txt["font"]}", {txt["fontsize"]}, {txt["bold"]}, {txt["fontcolor"]}, {txt["backcolor"]}, {txt["align"]});')
 
     return "\n".join(lines)
 
