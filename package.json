@@ -1,0 +1,20 @@
+{
+  "name": "samp-architect",
+  "version": "1.0.0",
+  "description": "AI-Powered SA-MP 3D Mapping & Architectural Generator with high precision, modular construction math, texture palettes, and direct Texture Studio / Pawn export.",
+  "main": "skills/samp-architect/scripts/samp_architect.py",
+  "license": "MIT",
+  "keywords": [
+    "antigravity",
+    "antigravity-plugin",
+    "samp",
+    "openmp",
+    "gta-sa",
+    "mapping",
+    "texture-studio",
+    "3d-architecture"
+  ],
+  "pi": {
+    "skills": ["./skills"]
+  }
+}
