@@ -32,7 +32,7 @@ You can install this plugin into any machine running Antigravity CLI or AGY IDE.
 ### Method 1: Global Plugin Installation (Recommended)
 Clone directly into your global Antigravity plugins directory:
 ```bash
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/samp-architect.git ~/.gemini/config/plugins/samp-architect
+git clone https://github.com/jenniferhebertgqm277-create/samp-architect.git ~/.gemini/config/plugins/samp-architect
 ```
 Antigravity will automatically discover and activate the plugin across all your projects.
 
@@ -43,14 +43,14 @@ If you want to keep the skill within a specific SA-MP server project repository:
 ```bash
 cd /path/to/your/samp-project
 mkdir -p .agents/plugins
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/samp-architect.git .agents/plugins/samp-architect
+git clone https://github.com/jenniferhebertgqm277-create/samp-architect.git .agents/plugins/samp-architect
 ```
 
 ---
 
 ### Method 3: Via Antigravity CLI
 ```bash
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/samp-architect.git /tmp/samp-architect
+git clone https://github.com/jenniferhebertgqm277-create/samp-architect.git /tmp/samp-architect
 agy plugin install /tmp/samp-architect
 ```
 

@@ -14,6 +14,10 @@
     "texture-studio",
     "3d-architecture"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jenniferhebertgqm277-create/samp-architect.git"
+  },
   "pi": {
     "skills": ["./skills"]
   }
